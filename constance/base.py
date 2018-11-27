@@ -1,4 +1,7 @@
+import tempfile
 from . import settings, utils
+
+filename = tempfile.mktemp(prefix='constance_')
 
 
 class Config(object):
@@ -10,6 +13,13 @@ class Config(object):
             utils.import_module_attr(settings.BACKEND)())
 
     def __getattr__(self, key):
+        from traceback import format_stack
+        with open(filename, 'a') as f:
+            f.write('{}\n'.format(key))
+            for line in format_stack():
+                f.write(line)
+            f.write('=' * 80)
+            f.write('\n')
         try:
             if not len(settings.CONFIG[key]) in (2, 3):
                 raise AttributeError(key)
